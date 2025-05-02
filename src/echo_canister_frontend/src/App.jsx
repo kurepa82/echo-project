@@ -1,31 +1,54 @@
-import { useState } from 'react';
-import { echo_canister_backend } from 'declarations/echo_canister_backend';
+// Archivo: App.jsx - Frontend React para ECHO conectado a backend Node.js con ChatGPT
 
-function App() {
-  const [greeting, setGreeting] = useState('');
+import React, { useState } from 'react';
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    echo_canister_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
+export default function App() {
+  const [mensaje, setMensaje] = useState('');
+  const [respuesta, setRespuesta] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const enviar = async () => {
+    setLoading(true);
+    setRespuesta('');
+    try {
+      const res = await fetch('http://localhost:3001/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ mensaje }),
+      });
+
+      const data = await res.json();
+      setRespuesta(data.respuesta);
+    } catch (error) {
+      console.error('Error al contactar al backend:', error);
+      setRespuesta('Hubo un error al contactar al servidor.');
+    }
+    setLoading(false);
+  };
 
   return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+    <div style={{ padding: '2rem', fontFamily: 'Arial', maxWidth: 600, margin: 'auto' }}>
+      <h1>ECHO 🧠</h1>
+      <p>Ingresá tu mensaje para que la IA lo procese.</p>
+      <textarea
+        rows="4"
+        value={mensaje}
+        onChange={(e) => setMensaje(e.target.value)}
+        placeholder="¿Qué recordás hoy?"
+        style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
+      />
+      <button onClick={enviar} disabled={loading}>
+        {loading ? 'Procesando...' : 'Enviar mensaje'}
+      </button>
+
+      {respuesta && (
+        <div style={{ marginTop: '2rem', background: '#f4f4f4', padding: '1rem', borderRadius: '8px' }}>
+          <strong>Respuesta:</strong>
+          <p>{respuesta}</p>
+        </div>
+      )}
+    </div>
   );
 }
-
-export default App;

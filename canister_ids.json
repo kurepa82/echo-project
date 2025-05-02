@@ -1,0 +1,8 @@
+{
+  "echo_canister_backend": {
+    "ic": "divnu-2yaaa-aaaaj-az72q-cai"
+  },
+  "echo_canister_frontend": {
+    "ic": "dbwgi-mqaaa-aaaaj-az73a-cai"
+  }
+}
