@@ -11,7 +11,7 @@ export default function App() {
     setLoading(true);
     setRespuesta('');
     try {
-      const res = await fetch('http://localhost:3001/api/chat', {
+      const res = await fetch('https://echo-project-1.onrender.com/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
