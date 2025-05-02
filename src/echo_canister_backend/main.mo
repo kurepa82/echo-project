@@ -1,5 +1,7 @@
-actor {
-  public query func greet(name : Text) : async Text {
-    return "Hello, " # name # "!";
-  };
-};
+actor EchoCanister {
+
+  public query func responder(mensaje : Text) : async Text {
+    "Qué lindo recuerdo: \"" # mensaje # "\". ¿Querés contarme más?"
+  }
+
+}

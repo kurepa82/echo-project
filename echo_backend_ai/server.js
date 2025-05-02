@@ -4,7 +4,14 @@ import express from 'express';
 import cors from 'cors';
 
 const app = express();
-app.use(cors({ origin: '*' }));
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+  optionsSuccessStatus: 200,
+}));
+
 app.use(express.json());
 
 app.post('/api/chat', async (req, res) => {
@@ -23,5 +30,6 @@ app.post('/api/chat', async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`🧠 ECHO backend escuchando en http://localhost:${PORT}`);
+  console.log(`🧠 ECHO backend corriendo en el puerto ${PORT}`);
 });
+
