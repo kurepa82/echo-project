@@ -1,5 +1,3 @@
-// Archivo: App.jsx - Frontend React para ECHO conectado a backend Node.js con ChatGPT
-
 import React, { useState } from 'react';
 
 export default function App() {
@@ -11,7 +9,7 @@ export default function App() {
     setLoading(true);
     setRespuesta('');
     try {
-      const res = await fetch('https://echo-project-1.onrender.com/api/chat', {
+      const res = await fetch('https://echo-backend-1-cudn.onrender.com/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
