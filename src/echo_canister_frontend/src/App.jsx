@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { HttpAgent, Actor } from '@dfinity/agent';
+import { idlFactory } from '../../declarations/echo_canister_backend'; // Ruta corregida
+
+// 🔐 Canister ID en red ICP directamente
+const canisterId = "divnu-2yaaa-aaaaj-az72q-cai";
 
 export default function App() {
   const [mensaje, setMensaje] = useState('');
@@ -8,28 +13,30 @@ export default function App() {
   const enviar = async () => {
     setLoading(true);
     setRespuesta('');
+
     try {
-      const res = await fetch('https://echo-backend-1-cudn.onrender.com/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mensaje }),
+      // 🌐 Importante: especificamos el host de ICP mainnet
+      const agent = new HttpAgent({ host: "https://icp-api.io" });
+
+      const backend = Actor.createActor(idlFactory, {
+        agent,
+        canisterId,
       });
 
-      const data = await res.json();
-      setRespuesta(data.respuesta);
+      const resp = await backend.responder(mensaje);
+      setRespuesta(resp);
     } catch (error) {
-      console.error('Error al contactar al backend:', error);
-      setRespuesta('Hubo un error al contactar al servidor.');
+      console.error('Error al contactar al canister:', error);
+      setRespuesta('Hubo un error al contactar al canister.');
     }
+
     setLoading(false);
   };
 
   return (
     <div style={{ padding: '2rem', fontFamily: 'Arial', maxWidth: 600, margin: 'auto' }}>
       <h1>ECHO 🧠</h1>
-      <p>Ingresá tu mensaje para que la IA lo procese.</p>
+      <p>Ingresá tu mensaje para que la IA lo procese y lo almacenemos como un recuerdo.</p>
       <textarea
         rows="4"
         value={mensaje}
@@ -38,7 +45,7 @@ export default function App() {
         style={{ width: '100%', padding: '0.5rem', marginBottom: '1rem' }}
       />
       <button onClick={enviar} disabled={loading}>
-        {loading ? 'Procesando...' : 'Enviar mensaje'}
+        {loading ? 'Guardando recuerdo...' : 'Guardar recuerdo'}
       </button>
 
       {respuesta && (
