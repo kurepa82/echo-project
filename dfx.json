@@ -6,7 +6,9 @@
     },
     "echo_canister_frontend": {
       "type": "assets",
-      "source": "src/echo_canister_frontend"
+      "source": [
+        "src/echo_canister_frontend"
+      ]
     }
   },
   "defaults": {
