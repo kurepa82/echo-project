@@ -1,0 +1,5 @@
+service : {
+  "login": (text, text) -> (bool);
+  "agregarRecuerdo": (text) -> (text);
+  "obtenerRecuerdos": () -> (vec text);
+}
