@@ -1,4 +1,5 @@
 {
+  "version": 1,
   "canisters": {
     "echo_canister_backend": {
       "type": "motoko",
@@ -14,6 +15,20 @@
   "defaults": {
     "build": {
       "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "bootstrap": "src/echo_canister_frontend",
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:4943",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "type": "persistent",
+      "providers": [
+        "https://ic0.app"
+      ]
     }
   }
 }

@@ -1,99 +1,83 @@
-import React, { useState } from 'react';
-import { echo_canister_backend } from "../../declarations/echo_canister_backend";
+import React, { useEffect, useState } from 'react';
+import { createActor, canisterId } from '../../declarations/echo_canister_backend';
+import { AuthClient } from "@dfinity/auth-client";
 
 export default function App() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authClient, setAuthClient] = useState(null);
+  const [actor, setActor] = useState(null);
   const [mensaje, setMensaje] = useState('');
   const [respuesta, setRespuesta] = useState('');
+  const [recuerdos, setRecuerdos] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const respuestasEmpaticas = [
-    "Gracias por confiarme eso. Estoy acá para escucharte.",
-    "Tu recuerdo importa. Gracias por compartirlo.",
-    "Qué momento tan especial. Estoy contigo.",
-    "Eso suena significativo. Guardémoslo juntos.",
-    "Me emociona que compartas eso conmigo.",
-  ];
-
-  const handleLogin = async () => {
-    try {
-      const ok = await echo_canister_backend.login(username, password);
-      if (ok) {
-        setIsAuthenticated(true);
-      } else {
-        alert('Credenciales incorrectas');
+  useEffect(() => {
+    AuthClient.create().then(async client => {
+      setAuthClient(client);
+      if (await client.isAuthenticated()) {
+        const identity = client.getIdentity();
+        setActor(createActor(canisterId, { agentOptions: { identity } }));
+        cargarRecuerdos(identity);
       }
-    } catch (err) {
-      console.error("Error en login:", err);
-      alert("Hubo un error intentando ingresar.");
-    }
+    });
+  }, []);
+
+  const login = async () => {
+    await authClient.login({
+      identityProvider: "https://identity.ic0.app",
+      onSuccess: async () => {
+        const identity = authClient.getIdentity();
+        setActor(createActor(canisterId, { agentOptions: { identity } }));
+        cargarRecuerdos(identity);
+      }
+    });
+  };
+
+  const cargarRecuerdos = async () => {
+    const lista = await actor.obtenerRecuerdos();
+    setRecuerdos(lista);
   };
 
   const enviar = async () => {
-    if (!mensaje.trim()) return;
     setLoading(true);
-    setRespuesta('');
-    try {
-      await echo_canister_backend.agregarRecuerdo(mensaje);
-      const aleatoria = respuestasEmpaticas[Math.floor(Math.random() * respuestasEmpaticas.length)];
-      setRespuesta(aleatoria);
-      setMensaje('');
-    } catch (err) {
-      console.error("Error al guardar el recuerdo:", err);
-      setRespuesta("Hubo un error al contactar al servidor.");
-    }
+    const res = await actor.agregarRecuerdo(mensaje);
+    setRespuesta(res);
+    setMensaje('');
+    cargarRecuerdos();
     setLoading(false);
   };
 
-  if (!isAuthenticated) {
+  if (!actor) {
     return (
-      <div style={{ padding: '2rem', fontFamily: 'Arial, sans-serif', maxWidth: 420, margin: 'auto', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>ECHO 🧠</h1>
-        <p style={{ fontStyle: 'italic', color: '#555' }}>Eco de una memoria eterna</p>
-        <input
-          type="text"
-          placeholder="Usuario (sugerido: admin)"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          style={{ width: '100%', padding: '0.6rem', margin: '1rem 0', borderRadius: '6px' }}
-        />
-        <input
-          type="password"
-          placeholder="Contraseña (sugerida: admin)"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ width: '100%', padding: '0.6rem', marginBottom: '1rem', borderRadius: '6px' }}
-        />
-        <button onClick={handleLogin} style={{ padding: '0.6rem 1.2rem', borderRadius: '6px', background: '#444', color: 'white' }}>
-          Ingresar
-        </button>
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <h1>ECHO 🧠</h1>
+        <p>Eco de una memoria eterna</p>
+        <button onClick={login}>Iniciar sesión con Internet Identity</button>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'Arial, sans-serif', maxWidth: 600, margin: 'auto' }}>
+    <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto", background: "#FA6FE5", borderRadius: "10px" }}>
       <h1>ECHO 🧠</h1>
-      <p>Contame un recuerdo que te gustaría que perdure con el tiempo.<br />Puede ser algo que te haga revivir un momento significativo de tu vida.</p>
+      <p>Contame un recuerdo que te gustaría que perdure con el tiempo.</p>
       <textarea
-        rows="5"
         value={mensaje}
         onChange={(e) => setMensaje(e.target.value)}
-        placeholder="Por ejemplo: El aroma del pan recién horneado en la cocina de mi abuela..."
-        style={{ width: '100%', padding: '1rem', marginBottom: '1rem', borderRadius: '8px', border: '1px solid #ccc' }}
+        rows="4"
+        placeholder="Tu recuerdo..."
+        style={{ width: "100%", padding: "1rem", borderRadius: "8px", marginBottom: "1rem" }}
       />
-      <button onClick={enviar} disabled={loading} style={{ padding: '0.8rem 1.5rem', borderRadius: '8px', background: '#222', color: '#fff' }}>
-        {loading ? 'Guardando...' : 'Guardar recuerdo'}
-      </button>
-
+      <button onClick={enviar} disabled={loading}>Guardar recuerdo</button>
       {respuesta && (
-        <div style={{ marginTop: '2rem', background: '#f1f1f1', padding: '1.2rem', borderRadius: '10px' }}>
+        <div style={{ marginTop: "1rem", background: "#fff", padding: "1rem", borderRadius: "10px" }}>
           <strong>Respuesta:</strong>
           <p>{respuesta}</p>
         </div>
       )}
+      <h3>Mis recuerdos:</h3>
+      <ul>
+        {recuerdos.map((r, i) => <li key={i}>{r}</li>)}
+      </ul>
     </div>
   );
 }

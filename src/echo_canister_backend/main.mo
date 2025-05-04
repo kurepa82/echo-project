@@ -1,26 +1,21 @@
 import Text "mo:base/Text";
 import Array "mo:base/Array";
 
-actor RecuerdoActor {
-  // Estado estable para guardar recuerdos
-  stable var recuerdos : [Text] = [];
+actor EchoCanister {
+  // Recuerdos guardados
+  stable var recuerdos: [Text] = [];
 
-  // Usuario y contraseña (sin ñ)
-  let usuarioAdmin : Text = "admin";
-  let contrasenaAdmin : Text = "admin";
+  // Credenciales fijas
+  let usuarioAdmin: Text = "admin";
+  let contraseniaAdmin: Text = "admin";
 
-  // Función privada para validar credenciales
-  private func esAdmin(user: Text, pass: Text) : Bool {
-    return user == usuarioAdmin and pass == contrasenaAdmin;
+  // Login básico
+  public func login(user: Text, pass: Text): async Bool {
+    return user == usuarioAdmin and pass == contraseniaAdmin;
   };
 
-  // Función pública de login
-  public func login(user: Text, pass: Text) : async Bool {
-    return esAdmin(user, pass);
-  };
-
-  // Función pública para agregar un recuerdo
-  public func agregarRecuerdo(recuerdo: Text) : async Text {
+  // Guardar recuerdo y devolver respuesta empática
+  public func agregarRecuerdo(recuerdo: Text): async Text {
     recuerdos := Array.append(recuerdos, [recuerdo]);
 
     let respuestas = [
@@ -35,8 +30,8 @@ actor RecuerdoActor {
     return respuestas[idx];
   };
 
-  // Función pública para obtener los recuerdos
-  public query func obtenerRecuerdos() : async [Text] {
+  // Obtener recuerdos
+  public query func obtenerRecuerdos(): async [Text] {
     return recuerdos;
   };
 }
