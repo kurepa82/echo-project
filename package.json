@@ -3,6 +3,10 @@
   "workspaces": [
     "src/echo_canister_frontend"
   ],
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite"
+  },
   "dependencies": {
     "@dfinity/agent": "^0.20.1",
     "@dfinity/auth-client": "^0.20.1",
